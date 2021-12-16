@@ -4,6 +4,15 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+pymongo = {extras = ["srv"], version = "*"}
+pandas = "*"
+scikit-learn = "*"
+flask = "*"
+python-dotenv = "*"
+flask-pymongo = "*"
+dnspython = "*"
+pytz = "*"
+numpy = "*"
 
 [dev-packages]
 

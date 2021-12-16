@@ -6,8 +6,8 @@
 #define TYPE "ESP32"
 
 const char* ssid = "brisa-2200735";
-const char* password = "r5boncn6";
-const char* serverName = "https://us-east-1.aws.data.mongodb-api.com/app/application-0-niuwc/endpoint/predicao_api?secret=87194584rm";
+const char* password = "qbyoag8g";
+const char* serverName = "https://us-east-1.aws.data.mongodb-api.com/app/api-predicao-xunrm/endpoint/predicao/save?secret=87194584rm";
 
 
 StaticJsonDocument<500> doc;
@@ -39,16 +39,15 @@ void loop() {
   gerarObjetoASerEnviado();
   enviarObjeto();
 
-  delay(100000);
+  delay(60000);
 }
 
 void gerarObjetoASerEnviado(){
   doc["id_node"] = "ESP";
-  doc["datetime"] = "09/12/2021 10:20"; 
   doc["sensors"]["0"]["type"] = "temperature";
-  doc["sensors"]["0"]["value"] = 25;
+  doc["sensors"]["0"]["value"] = random(18,30);
   doc["sensors"]["1"]["type"] = "humidity";
-  doc["sensors"]["1"]["value"] = 75;
+  doc["sensors"]["1"]["value"] = random(50,90);
 }
 
 void enviarObjeto(){
