@@ -15,24 +15,37 @@ app = Flask(__name__)
 
 # DB_URL = os.environ.get("DB_URL")
 # print(DB_URL)
-client = pymongo.MongoClient("mongodb+srv://joaopaulo:xxxx@cluster-xxxx.p0wqe.mongodb.net/xxxx-xxxx?retryWrites=true&w=majority",serverSelectionTimeoutMS=5000)
+client = pymongo.MongoClient("mongodb+srv://joaopaulo:87194584ms@cluster-predicao.p0wqe.mongodb.net/database-predicao?retryWrites=true&w=majority",serverSelectionTimeoutMS=5000)
 
 
 
 db = client['database-predicao']
-sensores = db['sensores']
+sensores = db['sensores_experimento_1']
 
 data = []
 qtd_data = 0
-TIME_TRAINING = 3600
+TIME_TRAINING_5_MINUTOS = 300
+TIME_TRAINING_1_HORA = 3600
+TIME_TRAINING_6_HORAS = 21600
 
 # Setting the date in a string var...
 datetime_format = "%d/%m/%Y %H:%M"
 date_read = datetime.now()
 date_time_last = str(date_read.strftime(datetime_format))
 
-model_1 = MLPRegressor() # modelo temperatura
-model_2 = MLPRegressor() # modelo humidade
+# {'activation': 'tanh',
+#  'hidden_layer_sizes': (150,),
+#  'learning_rate_init': 0.001,
+#  'max_iter': 10000}
+
+model_1 = MLPRegressor( activation = "tanh", hidden_layer_sizes=(150,), learning_rate_init=0.001, max_iter=10000) # modelo temperatura
+
+# 'activation': 'logistic',
+#  'hidden_layer_sizes': (150,),
+#  'learning_rate_init': 0.001,
+#  'max_iter': 1000
+
+model_2 = MLPRegressor( activation="logistic", hidden_layer_sizes=(150,),learning_rate_init=0.001, max_iter=1000) # modelo humidade
 
 predictions_1 = []
 predictions_2 = []
@@ -141,7 +154,7 @@ def training_initial():
 def training():
     global model_1, model_2, data
     while True:
-        time.sleep(TIME_TRAINING)
+        time.sleep(TIME_TRAINING_5_MINUTOS)
         print("Training...")
         dataNew = get_data() # novo dado que foi adicionado
         if(len(dataNew) == 0):
