@@ -20,13 +20,13 @@ client = pymongo.MongoClient("mongodb+srv://joaopaulo:87194584ms@cluster-predica
 
 
 db = client['database-predicao']
-sensores = db['sensores_experimento_2']
+sensores = db['sensores_experimento_3']
 
 data = []
 qtd_data = 0
 TIME_TRAINING_5_MINUTOS = 300
 TIME_TRAINING_1_HORA = 3600
-TIME_TRAINING_6_HORAS = 21600
+TIME_TRAINING_30_MINUTOS = 1800
 
 # Setting the date in a string var...
 datetime_format = "%d/%m/%Y %H:%M"
@@ -154,7 +154,7 @@ def training_initial():
 def training():
     global model_1, model_2, data
     while True:
-        time.sleep(TIME_TRAINING_1_HORA)
+        time.sleep(TIME_TRAINING_30_MINUTOS)
         print("Training...")
         dataNew = get_data() # novo dado que foi adicionado
         if(len(dataNew) == 0):
