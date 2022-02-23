@@ -10,6 +10,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
 from sklearn.neural_network import MLPRegressor
+from sklearn.preprocessing import StandardScaler
 
 app = Flask(__name__)
 
@@ -20,7 +21,7 @@ client = pymongo.MongoClient("mongodb+srv://joaopaulo:87194584ms@cluster-predica
 
 
 db = client['database-predicao']
-sensores = db['sensores_experimento_6']
+sensores = db['sensores_experimento_4']
 
 data = []
 qtd_data = 0
@@ -34,20 +35,21 @@ datetime_format = "%d/%m/%Y %H:%M"
 date_read = datetime.now()
 date_time_last = str(date_read.strftime(datetime_format))
 
-# {'activation': 'tanh',
+# {'activation': 'relu',
 #  'hidden_layer_sizes': (150,),
 #  'learning_rate_init': 0.001,
-#  'max_iter': 10000}
+#  'max_iter': 1000}
 
-model_1 = MLPRegressor( activation = "tanh", hidden_layer_sizes=(150,), learning_rate_init=0.001, max_iter=10000) # modelo temperatura
+model_1 = MLPRegressor( activation = "relu", hidden_layer_sizes=(150,), learning_rate_init=0.001, max_iter=1000) # modelo temperatura
 
 # 'activation': 'logistic',
 #  'hidden_layer_sizes': (150,),
 #  'learning_rate_init': 0.001,
 #  'max_iter': 1000
 
-model_2 = MLPRegressor( activation="logistic", hidden_layer_sizes=(150,),learning_rate_init=0.001, max_iter=1000) # modelo humidade
+model_2 = MLPRegressor( activation="logistic", hidden_layer_sizes=(150,),learning_rate_init=0.01, max_iter=5000) # modelo humidade
 
+scaler = StandardScaler()
 predictions_1 = []
 predictions_2 = []
 
@@ -70,16 +72,19 @@ def index():
 @app.route('/dados', methods=['GET'])
 def recuperar_dados_da_predicao():
     # TODO IMPLEMENTAR METODO PARA RECUPERAR DADOS DO BANCO
-    global model_1, model_2, y_test_1, predictions_1, y_test_2, predictions_2
+    global model_1, model_2, y_test_1, predictions_1, y_test_2, predictions_2, scaler
 
     now = datetime.now()
     dt = str(now.strftime('%d/%m/%Y %H:%M'))
     hora = now.hour*60
     t = hora+now.minute
-
-    temperature = pd.Series(model_1.predict(np.array([[t]]))).to_json(
+    hora_em_minutos = np.array([[t]])
+    hora_em_minutos = scaler.transform(hora_em_minutos)
+    entrada = pd.DataFrame([{'dia':now.day,'datetime':hora_em_minutos}])
+    print(entrada)
+    temperature = pd.Series(model_1.predict(entrada)).to_json(
         orient='values').replace('[', '').replace(']', '')
-    humidity = pd.Series(model_2.predict(np.array([[t]]))).to_json(
+    humidity = pd.Series(model_2.predict(entrada)).to_json(
         orient='values').replace('[', '').replace(']', '')
 
     predictions_1 = model_1.predict(X_test_1)
@@ -124,17 +129,20 @@ def get_data_initial():
         hora = dt.hour*60
         t = hora+dt.minute
         data.append(
-            {'datetime': t, 'temperature': i['sensors']['0']['value'], 'humidity': i['sensors']['1']['value']})
+            {'dia':dt.day,'datetime': t, 'temperature': i['sensors']['0']['value'], 'humidity': i['sensors']['1']['value']})
     qtd_data = len(data)
     print("Base de dados inserida")
 
 
 def training_initial():
-    global model_1, model_2, data, X_train_1, X_test_1, y_train_1, y_test_1, X_train_2, X_test_2, y_train_2, y_test_2
+    global model_1, model_2, data, X_train_1, X_test_1, y_train_1, y_test_1, X_train_2, X_test_2, y_train_2, y_test_2, scaler
     get_data_initial()
     print("Training initial...")
-    df = pd.DataFrame(data) # transfor em um dataframe para poder aplicar o MLP
-
+    df_despadronizado = pd.DataFrame(data) # transfor em um dataframe para poder aplicar o MLP
+    df = df_despadronizado.copy()
+    scaler.fit(df[['datetime']])
+    scaler.transform(df[['datetime']])
+    
     # o que tem 1 é relacionado a temperatura, 2 é relacionado a humidade
     
         # relação hora X temperatura
@@ -153,7 +161,7 @@ def training_initial():
 
 
 def training():
-    global model_1, model_2, data
+    global model_1, model_2, data, scaler
     while True:
         time.sleep(TIME_TRAINING_5_MINUTOS)
         print("Training...")
@@ -163,6 +171,7 @@ def training():
         else:
             print("partial fit for new data")
             df = pd.DataFrame(dataNew)
+            scaler.transform(df[['datetime']])
             model_1.partial_fit(
                 df.drop(columns=['temperature', 'humidity']), df['temperature'])
             model_2.partial_fit(
@@ -189,9 +198,9 @@ def get_data():
                 t = hora+dt.minute
 
                 output.append(
-                    {'datetime': t, 'temperature': i['sensors']['0']['value'], 'humidity': i['sensors']['1']['value']})
+                    {'dia': dt.day,'datetime': t, 'temperature': i['sensors']['0']['value'], 'humidity': i['sensors']['1']['value']})
                 data.append(
-                    {'datetime': t, 'temperature': i['sensors']['0']['value'], 'humidity': i['sensors']['1']['value']})
+                    {'dia': dt.day,'datetime': t, 'temperature': i['sensors']['0']['value'], 'humidity': i['sensors']['1']['value']})
         
         date_read = datetime.now()
         date_time_last = str(date_read.strftime(datetime_format))
