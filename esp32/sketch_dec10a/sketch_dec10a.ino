@@ -10,21 +10,19 @@
 
 DHT dht(DHTPIN, DHTTYPE);
 
-const char* ssid = "brisa-2200735";
-const char* password = "qbyoag8g";
-const char* serverName = "https://us-east-1.aws.data.mongodb-api.com/app/api-predicao-xunrm/endpoint/predicao/save?secret=87194584rm";
+const char* ssid = "network-id";
+const char* password = "network-password";
+const char* serverName = "https://server-name";
 
 
 StaticJsonDocument<500> doc;
 
-
-
 void setup() {
   Serial.begin(115200);
 
-  Serial.print("Conectando a : ");
+  Serial.print("Connecting to: ");
   Serial.print(ssid);
-  Serial.print(" com a senha ");
+  Serial.print(" with password: ");
   Serial.println(password);
 
   WiFi.begin(ssid, password);
@@ -34,10 +32,9 @@ void setup() {
   }
 
   Serial.println("");
-  Serial.print("Conectado ao WiFi Com o endereço de IP: ");
+  Serial.print("Connected to WiFi with IP Address: ");
   Serial.println(WiFi.localIP());
   dht.begin();
-
 }
 
 void loop() {
@@ -48,24 +45,24 @@ void loop() {
     t = dht.readTemperature();
     h = dht.readHumidity();
     if (isnan(t) || isnan(h)) {
-      Serial.println("não foi possível ler do sensor");
+      Serial.println("Can't read from sensor");
       return;
     }
-    gerarObjetoASerEnviado(h, t);
-    enviarObjeto();
+    createObjectToSend(h, t);
+    sendObject();
     delay(60000);
   } else {
     ESP.restart();
   }
 }
 
-void gerarObjetoASerEnviado(float humidade, float temperatura) {
+void createObjectToSend(float humidity, float temperature) {
   doc["id_node"] = "ESP";
-  doc["temperatura"] = temperatura;
-  doc["umidade"] = humidade;
+  doc["temperature"] = temperature;
+  doc["humidity"] = humidity;
 }
 
-void enviarObjeto() {
+void sendObject() {
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
 

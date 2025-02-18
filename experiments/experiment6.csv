@@ -1,4 +1,4 @@
-data_medicao,temp_real,temp_predita,temp_predita_floor,umi_real,umi_predita
+measurement_date,actual_temp,predicted_temp,predicted_temp_floor,actual_humidity,predicted_humidity
 24/02/2022 02:59,30.0,24.71,24,63,72.33
 24/02/2022 03:00,30.0,24.71,24,62,72.33
 24/02/2022 03:01,30.0,24.71,24,67,72.33
