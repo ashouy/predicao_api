@@ -1,4 +1,4 @@
-measurement_date,actual_temp,predicted_temp,predicted_temp_floor,actual_humidity,predicted_humidity
+measurement_date,actual_temp,predicted_temp,actual_humidity,predicted_humidity
 07/02/2022 13:09,31.0,29.19,56,69.64
 07/02/2022 13:10,31.0,29.19,59,69.64
 07/02/2022 13:11,32.0,29.19,59,69.64

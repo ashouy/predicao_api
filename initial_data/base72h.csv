@@ -1,4 +1,4 @@
-data,dia,hora_em_minutos,timestamp,temperatura_real,umidade_real
+date,day,hour_in_minutes,timestamp,real_temp,real_umid
 27/01/2022 11:45,27,705,1643294700.0,29.0,63
 27/01/2022 11:46,27,706,1643294760.0,29.0,68
 27/01/2022 11:47,27,707,1643294820.0,29.0,70
